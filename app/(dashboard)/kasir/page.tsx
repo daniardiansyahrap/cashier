@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { KasirMobile } from "@/components/app/kasir/KasirMobile";
+import { KasirDesktop } from "@/components/app/kasir/KasirDesktop";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,25 +14,34 @@ export default function KasirPage() {
   const [cart, setCart] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // State Dialog Bayar
   const [openBayar, setOpenBayar] = useState(false);
   const [metodeBayar, setMetodeBayar] = useState("cash");
   const [nominalBayar, setNominalBayar] = useState("");
   const [saving, setSaving] = useState(false);
 
-  async function fetchProduk() {
+  async function fetchData() {
     setLoading(true);
     try {
-      const res = await fetch("/api/produk");
-      const data = res.ok ? await res.json() : [];
-      setProduk(data);
+      const [resProduk, resKategori] = await Promise.all([
+        fetch("/api/produk"),
+        fetch("/api/kategori")
+      ]);
+      
+      const dataProduk = resProduk.ok ? await resProduk.json() : [];
+      const dataKategori = resKategori.ok ? await resKategori.json() : [];
+      
+      setProduk(dataProduk);
+      setKategori(dataKategori);
     } catch (error) {
       setProduk([]);
+      setKategori([]);
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => { fetchProduk(); }, []);
+  useEffect(() => { fetchData(); }, []);
 
   function addToCart(p: any) {
     setCart((prev) => {
@@ -89,21 +99,37 @@ export default function KasirPage() {
     return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(angka);
   }
 
-  if (loading) return <div className="p-10 text-center text-slate-500">Memuat produk...</div>;
+  if (loading) return <div className="p-10 text-center text-slate-500">Memuat data...</div>;
 
   return (
     <div className="h-full">
-      {/* Render Mobile */}
-      <KasirMobile 
-        produk={produk} 
+
+      {/* MOBILE */}
+      <div className="block lg:hidden h-full">
+        <KasirMobile
+          produk={produk}
+          kategori={kategori}
+          cart={cart}
+          addToCart={addToCart}
+          updateQty={updateQty}
+          removeFromCart={removeFromCart}
+          clearCart={clearCart}
+          total={total}
+          onBayar={() => setOpenBayar(true)}
+        />
+      </div>
+
+      {/* DESKTOP */}
+      <KasirDesktop
+        produk={produk}
         kategori={kategori}
-        cart={cart} 
-        addToCart={addToCart} 
-        updateQty={updateQty} 
-        removeFromCart={removeFromCart} 
-        clearCart={clearCart} 
-        total={total} 
-        onBayar={() => setOpenBayar(true)} 
+        cart={cart}
+        addToCart={addToCart}
+        updateQty={updateQty}
+        removeFromCart={removeFromCart}
+        clearCart={clearCart}
+        total={total}
+        onBayar={() => setOpenBayar(true)}
       />
 
       {/* Dialog Bayar */}

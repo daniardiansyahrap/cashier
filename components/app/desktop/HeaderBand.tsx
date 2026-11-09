@@ -86,7 +86,7 @@ export function HeaderBand({
     const firstName = userName.split(" ")[0];
 
     return (
-        <header className="hidden lg:block relative h-[124px] bg-gradient-to-b from-[#0b1438] to-[#111b4a]">
+        <header className="hidden lg:block relative h-[124px] rounded-br-[40px] bg-gradient-to-r from-[#0b1438] via-[#16265e] to-[#1e2f78] shadow-sm">
             <div className="mx-auto w-full max-w-[1320px] px-7">
                 <div className="flex items-center justify-between gap-5 pt-[18px]">
 

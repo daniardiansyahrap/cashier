@@ -47,21 +47,27 @@ export function AppShell({
   userRole: string;
   outletName: string;
   trialDaysLeft: number;
-  notifications: any[];
+  notifications: { type: "warning" | "info" | "success"; title: string; desc: string }[];
   header?: React.ReactNode;
 }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [hideBottomNav, setHideBottomNav] = useState(false); // <--- State buat nyembunyiin Bottom Nav
+  const [hideBottomNav, setHideBottomNav] = useState(false);
 
   useEffect(() => {
-    // Listener buka menu mobile (dari KasirMobile)
     const openMenu = () => setMobileMenuOpen(true);
     window.addEventListener("openMobileMenu", openMenu);
 
-    // Listener sembunyiin Bottom Nav (dari KasirMobile)
-    const handleToggleNav = (e: any) => {
-      setHideBottomNav(e.detail.hidden);
+    const handleToggleNav = (event: Event) => {
+      if (!(event instanceof CustomEvent)) return;
+      const detail: unknown = event.detail;
+      if (
+        typeof detail !== "object" ||
+        detail === null ||
+        !("hidden" in detail) ||
+        typeof detail.hidden !== "boolean"
+      ) return;
+      setHideBottomNav(detail.hidden);
     };
     window.addEventListener("toggleBottomNav", handleToggleNav);
 
@@ -72,6 +78,9 @@ export function AppShell({
   }, []);
 
   const isDashboard = pathname === "/dashboard";
+  // Tambahin pengecekan buat halaman transaksi/riwayat biar full width
+  const isFullWidthPage = pathname === "/kasir" || pathname === "/transaksi" || pathname === "/riwayat";
+  
   const firstName = userName.split(" ")[0];
 
   return (
@@ -85,11 +94,7 @@ export function AppShell({
       />
 
       {/* === MAIN AREA === */}
-      <main className={`min-w-0 flex-1 bg-[#f6f7fb] ${
-        pathname === "/kasir"
-          ? "h-dvh overflow-hidden pb-0 lg:h-auto lg:overflow-visible lg:pb-8"
-          : "pb-28 lg:pb-8"
-      }`}>
+      <main className={`min-w-0 flex-1 pb-28 lg:pb-8 bg-[#f6f7fb] ${isDashboard ? "lg:bg-[#e9eef6]" : ""} ${pathname === "/kasir" || pathname === "/transaksi" ? "lg:pb-0 lg:h-screen" : ""}`}>
         
         {/* === DESKTOP HEADER BAND (Khusus Dashboard Desktop) === */}
         {isDashboard && (
@@ -117,10 +122,10 @@ export function AppShell({
 
         {/* === KONTEN === */}
         <div
-          className={`w-full lg:mx-auto lg:max-w-[1320px] lg:px-7 ${
-            pathname === "/kasir"
-              ? "h-full"
-              : isDashboard ? "lg:-mt-10 pb-10" : "pt-0 pb-0"
+          className={`w-full ${
+            isFullWidthPage
+              ? "lg:max-w-full lg:px-0"
+              : `lg:mx-auto lg:max-w-[1320px] lg:px-7 ${isDashboard ? "lg:-mt-10 pb-10" : "pt-0 pb-0"}`
           } relative z-[1]`}
         >
           {children}

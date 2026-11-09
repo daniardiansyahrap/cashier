@@ -1,117 +1,97 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-function LoginForm() {
+export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const justRegistered = searchParams.get("registered");
-
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const result = await signIn("credentials", {
-      email: form.email,
-      password: form.password,
+    const res = await signIn("credentials", {
       redirect: false,
+      email,
+      password,
     });
 
-    if (result?.error) {
-      setError("Email atau password salah");
+    if (res?.error) {
+      setError("Email atau sandi salah");
       setLoading(false);
-      return;
+    } else {
+      router.push("/dashboard");
+      router.refresh();
     }
-
-    router.push("/dashboard");
-    router.refresh();
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl">Login Cashier</CardTitle>
-          <CardDescription>Masuk ke akun toko kamu</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {justRegistered && (
-            <div className="text-sm text-green-700 bg-green-50 p-3 rounded mb-4">
-              Registrasi berhasil! Silakan login.
-            </div>
-          )}
+    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-extrabold text-[#0b1230]">Masuk ke Cashier</h1>
+          <p className="text-slate-500 text-sm mt-1">Masukkan email dan sandi akun Anda</p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="budi@email.com"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Password kamu"
-                value={form.password}
-                onChange={(e) =>
-                  setForm({ ...form, password: e.target.value })
-                }
-                required
-              />
-            </div>
+        {error && (
+          <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-4 text-center font-medium">
+            {error}
+          </div>
+        )}
 
-            {error && (
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded">
-                {error}
-              </div>
-            )}
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Memproses..." : "Login"}
-            </Button>
-
-            <p className="text-sm text-center text-gray-600">
-              Belum punya akun?{" "}
-              <Link href="/register" className="text-blue-600 hover:underline">
-                Daftar di sini
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Email</Label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="nama@email.com"
+              required
+              className="mt-1 h-11"
+            />
+          </div>
+          
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <Label>Sandi</Label>
+              {/* LINK LUPA SANDI DI SINI */}
+              <Link href="/forgot-password" className="text-xs font-semibold text-[#c2410c] hover:underline">
+                Lupa sandi?
               </Link>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+            </div>
+            <Input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              className="mt-1 h-11"
+            />
+          </div>
 
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <LoginForm />
-    </Suspense>
+          <Button type="submit" className="w-full h-11 bg-[#c2410c] hover:bg-[#a83a0a] text-white font-bold text-base mt-2" disabled={loading}>
+            {loading ? "Memproses..." : "Masuk"}
+          </Button>
+        </form>
+
+        <div className="text-center mt-6 text-sm text-slate-500">
+          Belum punya akun?{" "}
+          <Link href="/register" className="font-semibold text-[#0b1230] hover:underline">
+            Daftar
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }

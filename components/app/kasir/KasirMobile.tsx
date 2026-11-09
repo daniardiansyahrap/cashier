@@ -87,13 +87,7 @@ export function KasirMobile({
       {/* FILTER KATEGORI */}
       <div className="px-4 py-3 shrink-0 z-10">
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none items-center">
-          <button
-            onClick={() => setSelectedCat(null)}
-            className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-colors ${selectedCat === null ? "bg-[#c2410c] text-white shadow-md" : "bg-white text-[#0b1230] border border-[#dde1ec]"
-              }`}
-          >
-            Semua
-          </button>
+          
           {kategori.map((k) => (
             <button
               key={k.id}
